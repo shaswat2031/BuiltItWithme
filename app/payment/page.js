@@ -4,8 +4,9 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { Suspense } from "react";
 
-export default function PaymentPage() {
+function PaymentContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [status, setStatus] = useState("processing");
@@ -182,6 +183,17 @@ export default function PaymentPage() {
           )}
         </div>
       </div>
+    </div>
+  );
+}
+
+export default function PaymentPage() {
+  return (
+    <div>
+      {/* Any server components or static content */}
+      <Suspense fallback={<div>Loading payment details...</div>}>
+        <PaymentContent />
+      </Suspense>
     </div>
   );
 }
