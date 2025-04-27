@@ -67,7 +67,7 @@ export default function QRCodePayment({ plan, amount }) {
             onClick={() => setShowConfirmation(true)}
             className="w-full bg-green-600 border border-transparent rounded-md py-3 text-sm font-semibold text-white text-center hover:bg-green-700 transition-colors shadow-md hover:shadow-lg"
           >
-            I've Made the Payment
+            I&apos;ve Made the Payment
           </button>
         </div>
       ) : (

@@ -136,7 +136,7 @@ export default function PricingPage() {
               </div>
               <div className="pt-6 pb-8 px-6">
                 <h3 className="text-sm font-medium text-gray-900 tracking-wide uppercase">
-                  What's included
+                  What&apos;s included
                 </h3>
                 <ul className="mt-6 space-y-4">
                   <li className="flex space-x-3">
@@ -227,7 +227,7 @@ export default function PricingPage() {
               </div>
               <div className="pt-6 pb-8 px-6">
                 <h3 className="text-sm font-medium text-gray-900 tracking-wide uppercase">
-                  What's included
+                  What&apos;s included
                 </h3>
                 <ul className="mt-6 space-y-4">
                   <li className="flex space-x-3">
