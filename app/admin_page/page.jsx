@@ -613,6 +613,95 @@ export default function AdminDashboard() {
                     </div>
                   </div>
 
+                  {/* Payment Information Section */}
+                  <div className="mb-6">
+                    <h3 className="text-sm font-medium text-gray-600 mb-1">
+                      Payment Information
+                    </h3>
+                    <div className="bg-gray-50 p-4 rounded-md">
+                      {selectedSubmission.paymentId ? (
+                        <>
+                          <div className="grid grid-cols-2 gap-4 mb-3">
+                            <p>
+                              <span className="font-medium">Payment ID:</span>{" "}
+                              <span className="font-mono">
+                                {selectedSubmission.paymentId}
+                              </span>
+                            </p>
+                            <p>
+                              <span className="font-medium">Status:</span>{" "}
+                              <span
+                                className={`px-2 py-0.5 rounded-full text-xs ${
+                                  selectedSubmission.paymentId &&
+                                  !selectedSubmission.paymentId.includes(
+                                    "UNPAID"
+                                  ) &&
+                                  !selectedSubmission.paymentId.includes(
+                                    "TESTING"
+                                  )
+                                    ? "bg-green-100 text-green-800"
+                                    : selectedSubmission.paymentId &&
+                                      selectedSubmission.paymentId.includes(
+                                        "TESTING"
+                                      )
+                                    ? "bg-yellow-100 text-yellow-800"
+                                    : "bg-red-100 text-red-800"
+                                }`}
+                              >
+                                {selectedSubmission.paymentId &&
+                                !selectedSubmission.paymentId.includes(
+                                  "UNPAID"
+                                ) &&
+                                !selectedSubmission.paymentId.includes(
+                                  "TESTING"
+                                )
+                                  ? "COMPLETED"
+                                  : selectedSubmission.paymentId &&
+                                    selectedSubmission.paymentId.includes(
+                                      "TESTING"
+                                    )
+                                  ? "TEST PAYMENT"
+                                  : "UNPAID"}
+                              </span>
+                            </p>
+                          </div>
+                          <div className="grid grid-cols-2 gap-4">
+                            {selectedSubmission.planType && (
+                              <p>
+                                <span className="font-medium">Plan Type:</span>{" "}
+                                {selectedSubmission.planType === "code"
+                                  ? "Code Only ($699)"
+                                  : "Live Website ($799)"}
+                              </p>
+                            )}
+                            {selectedSubmission.paymentDate && (
+                              <p>
+                                <span className="font-medium">
+                                  Payment Date:
+                                </span>{" "}
+                                {new Date(
+                                  selectedSubmission.paymentDate
+                                ).toLocaleDateString()}
+                              </p>
+                            )}
+                            {selectedSubmission.paymentName && (
+                              <p>
+                                <span className="font-medium">
+                                  Customer Name:
+                                </span>{" "}
+                                {selectedSubmission.paymentName}
+                              </p>
+                            )}
+                          </div>
+                        </>
+                      ) : (
+                        <p className="text-gray-500 italic">
+                          No payment information available
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
                   {selectedSubmission.planType === "live" && (
                     <div className="mb-6">
                       <h3 className="text-sm font-medium text-gray-600 mb-1">

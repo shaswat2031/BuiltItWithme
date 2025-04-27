@@ -16,21 +16,21 @@ export default function PaymentContent() {
     const plan = searchParams.get("plan");
 
     if (success && paymentId) {
-      // Save payment info to localStorage
-      localStorage.setItem("paymentCompleted", "true");
-      localStorage.setItem("paymentId", paymentId);
-      localStorage.setItem("paymentPlan", plan);
-      localStorage.setItem("paymentDate", new Date().toISOString());
+      // Get payment details from localStorage
+      const paymentName = localStorage.getItem("paymentName") || "Customer";
 
       setPaymentDetails({
         id: paymentId,
         plan: plan,
-        date: new Date().toLocaleString(),
+        date: new Date(
+          localStorage.getItem("paymentDate") || new Date()
+        ).toLocaleString(),
+        name: paymentName,
       });
 
       setStatus("success");
 
-      // Auto-redirect after 3 seconds
+      // Auto-redirect after 5 seconds
       const timer = setTimeout(() => {
         if (plan === "code") {
           router.push("/formscode");
@@ -39,7 +39,7 @@ export default function PaymentContent() {
         } else if (plan === "mock") {
           // Don't auto-redirect for mock payments
         }
-      }, 3000);
+      }, 5000);
 
       return () => clearTimeout(timer);
     } else {
@@ -108,6 +108,15 @@ export default function PaymentContent() {
                   <dl className="grid grid-cols-1 gap-y-3">
                     <div className="sm:grid sm:grid-cols-3 sm:gap-4">
                       <dt className="text-sm font-medium text-gray-500">
+                        Customer Name
+                      </dt>
+                      <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                        {paymentDetails.name}
+                      </dd>
+                    </div>
+
+                    <div className="sm:grid sm:grid-cols-3 sm:gap-4">
+                      <dt className="text-sm font-medium text-gray-500">
                         Plan
                       </dt>
                       <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
@@ -121,7 +130,7 @@ export default function PaymentContent() {
 
                     <div className="sm:grid sm:grid-cols-3 sm:gap-4">
                       <dt className="text-sm font-medium text-gray-500">
-                        Payment ID
+                        Transaction ID
                       </dt>
                       <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
                         {paymentDetails.id}

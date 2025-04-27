@@ -160,7 +160,8 @@ function LiveWebsiteForm() {
     if (
       !paymentCompleted &&
       !formData.bypassPayment &&
-      paymentPlan !== "live"
+      paymentPlan !== "live" &&
+      paymentPlan !== "mock"
     ) {
       alert(
         "Payment is required before submitting this form. Please complete payment on the pricing page."
@@ -201,10 +202,11 @@ function LiveWebsiteForm() {
       // Add status (default to pending)
       formDataToSend.append("status", "pending");
 
-      // Handle payment info - use bypass option for testing when PayPal fails
+      // Handle payment info
       if (formData.bypassPayment) {
         formDataToSend.append("paymentId", "TESTING-BYPASS");
         formDataToSend.append("paymentDate", new Date().toISOString());
+        formDataToSend.append("paymentName", "Test User");
       } else {
         // Regular payment flow
         formDataToSend.append(
@@ -214,6 +216,10 @@ function LiveWebsiteForm() {
         formDataToSend.append(
           "paymentDate",
           localStorage.getItem("paymentDate") || ""
+        );
+        formDataToSend.append(
+          "paymentName",
+          localStorage.getItem("paymentName") || "Unknown"
         );
       }
 

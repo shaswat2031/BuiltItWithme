@@ -17,12 +17,14 @@ export default function PaymentCheck({ requiredPlan }) {
       const paymentPlan = localStorage.getItem("paymentPlan");
       const paymentId = localStorage.getItem("paymentId");
       const paymentDate = localStorage.getItem("paymentDate");
+      const paymentName = localStorage.getItem("paymentName");
 
       // Payment is valid if:
       // 1. Payment is marked as completed AND
-      // 2. Payment plan matches the required plan AND
+      // 2. Payment plan matches the required plan (or is mock which has access to all) AND
       // 3. Payment ID exists AND
-      // 4. Payment date exists and is less than 7 days old (prevent very old payments)
+      // 4. Payment date exists and is less than 7 days old
+      // 5. Customer name exists
 
       let dateValid = true;
       if (paymentDate) {
@@ -34,9 +36,11 @@ export default function PaymentCheck({ requiredPlan }) {
 
       const isValid =
         paymentCompleted &&
-        paymentPlan === requiredPlan &&
+        (paymentPlan === requiredPlan || paymentPlan === "mock") &&
         paymentId &&
-        dateValid;
+        dateValid &&
+        paymentName;
+
       setPaymentValid(isValid);
       setLoading(false);
     };
