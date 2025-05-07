@@ -7,26 +7,43 @@ import Link from "next/link";
 export default function SubmissionDetailsPage() {
   const [submission, setSubmission] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const params = useParams();
   const { id } = params;
 
-  useEffect(() => {
-    const fetchSubmission = async () => {
-      try {
-        // Replace with your actual API endpoint for fetching a submission
-        const response = await fetch(`/api/submissions/${id}`);
-        if (!response.ok) {
-          throw new Error("Failed to fetch submission");
-        }
-        const data = await response.json();
-        setSubmission(data);
-      } catch (error) {
-        console.error("Error fetching submission:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchSubmission = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch(`/api/submissions/${id}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        cache: "no-store",
+      });
 
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+          errorData.message ||
+            `Error ${response.status}: Failed to fetch submission`
+        );
+      }
+
+      const data = await response.json();
+      setSubmission(data);
+    } catch (error) {
+      console.error("Error fetching submission:", error);
+      setError(
+        error.message || "Failed to load submission data. Please try again."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     if (id) {
       fetchSubmission();
     }
@@ -36,6 +53,31 @@ export default function SubmissionDetailsPage() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center p-4">
+        <h1 className="text-2xl font-bold text-red-600">
+          Error Loading Submission
+        </h1>
+        <p className="mt-2 text-gray-600">{error}</p>
+        <div className="mt-4 flex space-x-4">
+          <button
+            onClick={fetchSubmission}
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
+            Try Again
+          </button>
+          <Link
+            href="/admin/submissions"
+            className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
+          >
+            Back to Submissions
+          </Link>
+        </div>
       </div>
     );
   }
