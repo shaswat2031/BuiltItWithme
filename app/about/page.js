@@ -136,7 +136,7 @@ export default function About() {
                     Custom Portfolio Websites
                   </h3>
                   <p className="text-gray-600">
-                    Starting at just ₹699, fully personalized for your brand
+                    Professional sites from ₹2,500 - your brand, your style
                   </p>
                 </div>
               </div>
@@ -162,11 +162,10 @@ export default function About() {
                 </span>
                 <div className="ml-4">
                   <h3 className="font-bold text-gray-800 mb-1">
-                    Modern Frameworks
+                    Modern Tech Stack
                   </h3>
                   <p className="text-gray-600">
-                    Built using React, Next.js and other cutting-edge
-                    technologies To Build The Brand
+                    Built with React & Next.js for optimal performance
                   </p>
                 </div>
               </div>
@@ -192,11 +191,10 @@ export default function About() {
                 </span>
                 <div className="ml-4">
                   <h3 className="font-bold text-gray-800 mb-1">
-                    Full Ownership
+                    100% Ownership
                   </h3>
                   <p className="text-gray-600">
-                    Deployed on Vercel with complete GitHub ownership
-                    transferred to you
+                    Your site, your code - full GitHub access included
                   </p>
                 </div>
               </div>
@@ -222,10 +220,10 @@ export default function About() {
                 </span>
                 <div className="ml-4">
                   <h3 className="font-bold text-gray-800 mb-1">
-                    Quick Turnaround
+                    3-4 Day Delivery
                   </h3>
                   <p className="text-gray-600">
-                    Delivered in just 3-4 days with fully responsive design
+                    Rapid turnaround with responsive design for all devices
                   </p>
                 </div>
               </div>
