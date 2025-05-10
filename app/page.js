@@ -33,14 +33,14 @@ export default function Home() {
             </span>
             <h1 className="text-5xl md:text-6xl font-extrabold mb-6 leading-tight">
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-purple-200">
-                Transform Your Ideas Into Digital Reality
+                Developed by Us. Defined as A Brand
               </span>
             </h1>
             <p className="text-xl md:text-2xl mb-8 text-purple-100 font-light">
               Beautiful, responsive websites custom-built for your brand
               starting at just
               <span className="font-bold text-white ml-2 text-2xl md:text-3xl">
-                ₹699
+                ₹2500
               </span>
               .<br />
               <span className="relative inline-block font-bold mx-2 px-2">
@@ -111,32 +111,37 @@ export default function Home() {
             <div className="h-1 w-24 bg-gradient-to-r from-blue-500 to-purple-600 mx-auto"></div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-8">
             {[
               {
                 icon: "💰",
-                title: "Affordable Pricing",
-                desc: "Premium quality without breaking the bank",
+                title: "Budget-Friendly",
+                desc: "High-quality websites starting at just ₹2,500",
               },
               {
                 icon: "⚡",
-                title: "3–4 Day Delivery",
-                desc: "Quick turnaround to get you online fast",
+                title: "Quick Delivery",
+                desc: "Your complete website ready in just 3-4 business days",
               },
               {
                 icon: "🎨",
-                title: "Custom Design & Code",
-                desc: "Tailored to match your personal brand",
+                title: "Unique Design",
+                desc: "Custom-built to perfectly represent your brand identity",
               },
               {
                 icon: "🚀",
-                title: "FREE Vercel Deployment",
-                desc: "Professional hosting included",
+                title: "Easy Hosting",
+                desc: "We handle deployment with free Vercel hosting included",
               },
               {
                 icon: "🌟",
-                title: "Perfect for Creators",
-                desc: "Ideal for freelancers & small businesses",
+                title: "Small Business Focus",
+                desc: "Specifically designed for creators and entrepreneurs",
+              },
+              {
+                icon: "🔒",
+                title: "100% Ownership",
+                desc: "You own the code and domain with full control",
               },
             ].map((item, index) => (
               <div
@@ -165,98 +170,215 @@ export default function Home() {
             <div className="h-1 w-24 bg-gradient-to-r from-green-500 to-blue-500 mx-auto"></div>
           </div>
 
-          <div className="max-w-3xl mx-auto">
+          <div className="max-w-4xl mx-auto">
             <MotionDiv
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
               className="bg-white p-8 md:p-10 rounded-2xl shadow-xl border border-gray-100"
             >
-              <ul className="space-y-5">
-                {[
-                  {
-                    icon: "✨",
-                    text: "One-page portfolio website with modern design",
-                    highlight: "",
-                  },
-                  {
-                    icon: "📱",
-                    text: "Fully responsive design for all devices",
-                    highlight: "Mobile-friendly",
-                  },
-                  {
-                    icon: "🔍",
-                    text: "Custom content sections tailored to your needs",
-                    highlight: "Personalized",
-                  },
-                  {
-                    icon: "🚀",
-                    text: "Free deployment to your GitHub + Vercel",
-                    highlight: "No hosting fees",
-                  },
-                  {
-                    icon: "💻",
-                    text: "Optional: Full source code access (₹699) or Complete Setup (₹799)",
-                    highlight: "Your choice",
-                  },
-                ].map((item, idx) => (
-                  <li
-                    key={idx}
-                    className="flex items-center gap-4 text-lg border-b border-gray-100 pb-4 last:border-0"
-                  >
-                    <span className="text-2xl bg-blue-50 p-2 rounded-lg">
-                      {item.icon}
-                    </span>
-                    <div>
-                      <span className="text-gray-800">{item.text}</span>
-                      {item.highlight && (
-                        <span className="ml-2 text-sm font-bold bg-green-100 text-green-700 px-2 py-1 rounded-full">
-                          {item.highlight}
-                        </span>
-                      )}
-                    </div>
-                  </li>
-                ))}
-              </ul>
+              {/* Basic Package */}
+              <div className="mb-8 pb-2 border-b border-gray-100">
+                <h3 className="text-xl font-bold text-blue-600 mb-4">
+                  Basic Package (₹2,500)
+                </h3>
+                <ul className="space-y-4">
+                  {[
+                    {
+                      icon: "✨",
+                      text: "One-page professional website with modern design",
+                      highlight: "Included",
+                    },
+                    {
+                      icon: "📱",
+                      text: "Fully responsive design for all devices (mobile, tablet & desktop)",
+                      highlight: "Mobile-friendly",
+                    },
+                    {
+                      icon: "🔍",
+                      text: "Up to 5 custom content sections tailored to your needs",
+                      highlight: "Personalized",
+                    },
+                  ].map((item, idx) => (
+                    <li key={idx} className="flex items-center gap-4 text-lg">
+                      <span className="text-2xl bg-blue-50 p-2 rounded-lg">
+                        {item.icon}
+                      </span>
+                      <div>
+                        <span className="text-gray-800">{item.text}</span>
+                        {item.highlight && (
+                          <span className="ml-2 text-sm font-bold bg-green-100 text-green-700 px-2 py-1 rounded-full">
+                            {item.highlight}
+                          </span>
+                        )}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Hosting & Technical */}
+              <div className="mb-8 pb-2 border-b border-gray-100">
+                <h3 className="text-xl font-bold text-blue-600 mb-4">
+                  Hosting & Technical
+                </h3>
+                <ul className="space-y-4">
+                  {[
+                    {
+                      icon: "🚀",
+                      text: "Free deployment to GitHub + Vercel",
+                      highlight: "No hosting fees",
+                    },
+                    {
+                      icon: "⚡",
+                      text: "Lightning-fast performance with next-gen optimization",
+                      highlight: "SEO-friendly",
+                    },
+                    {
+                      icon: "🔒",
+                      text: "HTTPS security and basic SEO setup",
+                      highlight: "Secure",
+                    },
+                  ].map((item, idx) => (
+                    <li key={idx} className="flex items-center gap-4 text-lg">
+                      <span className="text-2xl bg-blue-50 p-2 rounded-lg">
+                        {item.icon}
+                      </span>
+                      <div>
+                        <span className="text-gray-800">{item.text}</span>
+                        {item.highlight && (
+                          <span className="ml-2 text-sm font-bold bg-green-100 text-green-700 px-2 py-1 rounded-full">
+                            {item.highlight}
+                          </span>
+                        )}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Add-ons */}
+              <div>
+                <h3 className="text-xl font-bold text-blue-600 mb-4">
+                  Optional Add-ons
+                </h3>
+                <ul className="space-y-4">
+                  {[
+                    {
+                      icon: "💻",
+                      text: "Full source code access (₹699)",
+                      highlight: "Developer option",
+                    },
+                    {
+                      icon: "🛠️",
+                      text: "Complete setup with domain & email configuration (₹799)",
+                      highlight: "Hassle-free",
+                    },
+                    {
+                      icon: "🔄",
+                      text: "Free revisions within first 7 days of delivery",
+                      highlight: "Satisfaction guaranteed",
+                    },
+                  ].map((item, idx) => (
+                    <li key={idx} className="flex items-center gap-4 text-lg">
+                      <span className="text-2xl bg-blue-50 p-2 rounded-lg">
+                        {item.icon}
+                      </span>
+                      <div>
+                        <span className="text-gray-800">{item.text}</span>
+                        {item.highlight && (
+                          <span className="ml-2 text-sm font-bold bg-green-100 text-green-700 px-2 py-1 rounded-full">
+                            {item.highlight}
+                          </span>
+                        )}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </MotionDiv>
           </div>
         </div>
       </section>
 
-      <section className="py-16 px-4">
+      <section className="py-16 px-4 bg-gradient-to-b from-white to-blue-50">
         <div className="container mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-12">How It Works</h2>
+          <div className="text-center mb-12">
+            <span className="bg-blue-100 text-blue-700 px-4 py-1 rounded-full text-sm font-medium mb-2 inline-block">
+              Simple Process
+            </span>
+            <h2 className="text-4xl font-bold mt-2">How It Works</h2>
+            <p className="text-gray-600 mt-4 max-w-2xl mx-auto">
+              Getting your professional website is just 3 simple steps away.
+              We&apos;ve streamlined the process to make it quick and
+              hassle-free.
+            </p>
+          </div>
 
-          <div className="flex flex-col md:flex-row justify-center items-center md:items-start gap-8 max-w-4xl mx-auto">
+          <div className="flex flex-col md:flex-row justify-center items-stretch gap-6 max-w-5xl mx-auto">
             {[
               {
-                step: "1️⃣",
-                title: "Fill the Form",
-                desc: "Tell us about your project needs",
+                step: "01",
+                icon: "📝",
+                title: "Share Your Vision",
+                desc: "Fill our simple form with your requirements, preferences, and any examples you like. The more details you provide, the better we can match your vision.",
+                color: "blue",
               },
               {
-                step: "2️⃣",
-                title: "We Design & Develop",
-                desc: "Our team creates your custom site",
+                step: "02",
+                icon: "🎨",
+                title: "We Create Your Site",
+                desc: "Our team of designers and developers will craft your custom website with attention to your brand, target audience, and specific needs.",
+                color: "purple",
               },
               {
-                step: "3️⃣",
-                title: "Delivered in 3–4 Days",
-                desc: "Your site goes live quickly",
+                step: "03",
+                icon: "🚀",
+                title: "Launch in 3-4 Days",
+                desc: "Your complete website is delivered and deployed quickly. We'll handle the technical setup so you can focus on your business.",
+                color: "green",
               },
             ].map((step, idx) => (
-              <div key={idx} className="text-center md:w-1/3 relative">
-                <div className="text-4xl mb-4">{step.step}</div>
-                <h3 className="text-xl font-semibold mb-2">{step.title}</h3>
-                <p className="text-gray-600">{step.desc}</p>
+              <div
+                key={idx}
+                className="relative bg-white rounded-xl shadow-md p-8 md:w-1/3 border border-gray-100 hover:shadow-lg transition-all duration-300"
+              >
+                <div
+                  className={`absolute -top-4 -right-4 w-12 h-12 rounded-full bg-${step.color}-600 flex items-center justify-center text-white font-bold`}
+                >
+                  {step.step}
+                </div>
+
+                <div className="text-4xl mb-6">{step.icon}</div>
+                <h3
+                  className={`text-2xl font-bold mb-4 text-${step.color}-600`}
+                >
+                  {step.title}
+                </h3>
+                <p className="text-gray-600 mb-4">{step.desc}</p>
 
                 {idx < 2 && (
-                  <div className="hidden md:block absolute top-6 right-0 transform translate-x-1/2 text-3xl text-gray-300">
+                  <div className="hidden md:block absolute top-1/2 -right-4 transform translate-x-0 z-10 text-3xl text-gray-300">
                     →
                   </div>
                 )}
               </div>
             ))}
+          </div>
+
+          <div className="text-center mt-12">
+            <Link href="/pricing">
+              <MotionButton
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="bg-blue-600 text-white hover:bg-blue-700 px-8 py-4 rounded-xl font-bold transition shadow-lg hover:shadow-xl"
+              >
+                Start Your Project Now
+              </MotionButton>
+            </Link>
+            <p className="text-gray-500 mt-4 text-sm">
+              No commitment - Get a free consultation
+            </p>
           </div>
         </div>
       </section>

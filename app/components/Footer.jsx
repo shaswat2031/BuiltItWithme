@@ -16,17 +16,6 @@ export default function Footer() {
               Affordable, custom portfolio websites for creators, freelancers,
               and small businesses.
             </p>
-            <div className="mt-6">
-              <h4 className="text-lg font-semibold mb-3">Payment We Accept</h4>
-              <div className="flex gap-3 items-center bg-gray-800 p-2 rounded-lg inline-flex">
-                <div className="bg-white px-2 py-1 rounded">
-                  <Image src={paypal} alt="PayPal" width={60} height={20} />
-                </div>
-                <span className="text-gray-300 text-sm">
-                  Secure payments via PayPal
-                </span>
-              </div>
-            </div>
           </div>
 
           {/* Quick Links */}
