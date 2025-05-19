@@ -22,6 +22,43 @@ export async function createDriveClient() {
   }
 }
 
+// Create a folder in Google Drive
+export async function createDriveFolder(folderName) {
+  try {
+    const driveClient = await createDriveClient();
+
+    // Check if folder already exists
+    const response = await driveClient.files.list({
+      q: `mimeType='application/vnd.google-apps.folder' and name='${folderName}' and trashed=false`,
+      fields: "files(id, name)",
+    });
+
+    if (response.data.files.length > 0) {
+      console.log(
+        `Folder "${folderName}" already exists with ID: ${response.data.files[0].id}`
+      );
+      return response.data.files[0].id;
+    }
+
+    // Create folder if it doesn't exist
+    const fileMetadata = {
+      name: folderName,
+      mimeType: "application/vnd.google-apps.folder",
+    };
+
+    const folder = await driveClient.files.create({
+      resource: fileMetadata,
+      fields: "id",
+    });
+
+    console.log(`Folder "${folderName}" created with ID: ${folder.data.id}`);
+    return folder.data.id;
+  } catch (error) {
+    console.error("Error creating Google Drive folder:", error);
+    throw new Error("Failed to create Google Drive folder");
+  }
+}
+
 // Upload a file to Google Drive
 export async function uploadFileToDrive(filePath, fileName, folderId = null) {
   try {
@@ -77,5 +114,39 @@ export async function setFilePubliclyAccessible(fileId) {
   } catch (error) {
     console.error("Error setting file permissions:", error);
     throw error;
+  }
+}
+
+// Upload a buffer to Google Drive
+export async function uploadBufferToDrive(
+  buffer,
+  fileName,
+  mimeType,
+  folderId = null
+) {
+  try {
+    const driveClient = await createDriveClient();
+
+    const fileMetadata = {
+      name: fileName,
+      ...(folderId && { parents: [folderId] }),
+    };
+
+    const media = {
+      mimeType: mimeType || "application/octet-stream",
+      body: buffer,
+    };
+
+    const response = await driveClient.files.create({
+      requestBody: fileMetadata,
+      media,
+      fields: "id",
+    });
+
+    console.log(`Buffer uploaded to Google Drive with ID: ${response.data.id}`);
+    return response.data.id;
+  } catch (error) {
+    console.error("Error uploading buffer to Google Drive:", error);
+    throw new Error("Failed to upload buffer to Google Drive");
   }
 }

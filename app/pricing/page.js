@@ -18,11 +18,9 @@ export default function PricingPage() {
 
     // Set the amount based on the selected plan
     if (plan === "code") {
-      setSelectedAmount(699);
+      setSelectedAmount(2500);
     } else if (plan === "live") {
-      setSelectedAmount(799);
-    } else if (plan === "mock") {
-      setSelectedAmount(1);
+      setSelectedAmount(6000);
     }
 
     setShowPaymentModal(true);
@@ -34,18 +32,59 @@ export default function PricingPage() {
   };
 
   // Handle manual payment process for testing
-  const handleManualPayment = (plan) => {
-    const tempPaymentId = `MANUAL-${Date.now()}-${Math.floor(
-      Math.random() * 1000
-    )}`;
-    localStorage.setItem("paymentCompleted", "true");
-    localStorage.setItem("paymentId", tempPaymentId);
-    localStorage.setItem("paymentPlan", plan);
-    localStorage.setItem("paymentDate", new Date().toISOString());
-    localStorage.setItem("paymentName", "Test User");
-    router.push(
-      `/payment?paymentId=${tempPaymentId}&plan=${plan}&success=true`
-    );
+  const handleManualPayment = async (plan) => {
+    try {
+      // Generate a unique transaction ID for testing
+      const testTransactionId = `TEST-${Date.now()}-${Math.floor(
+        Math.random() * 1000
+      )}`;
+
+      // Store payment data in MongoDB without pre-generating an ID
+      const paymentData = {
+        plan: plan,
+        status: "completed",
+        amount: plan === "code" ? 2500 : 6000,
+        paymentDate: new Date().toISOString(),
+        userName: "Test User",
+        paymentMethod: "Manual Test",
+        transactionId: testTransactionId,
+      };
+
+      // Send data to API endpoint
+      const response = await fetch("/api/payments/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(paymentData),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to store payment data");
+      }
+
+      // Get the generated MongoDB ID from the response
+      const result = await response.json();
+      const paymentId = result.paymentId;
+
+      // Store in localStorage for client-side verification
+      localStorage.setItem("paymentCompleted", "true");
+      localStorage.setItem("paymentPlan", plan);
+      localStorage.setItem("paymentId", paymentId);
+      localStorage.setItem("paymentDate", new Date().toISOString());
+      localStorage.setItem("paymentName", "Test User");
+      localStorage.setItem("transactionId", testTransactionId);
+
+      // Navigate to payment success page with the MongoDB-generated ID
+      router.push(
+        `/payment?paymentId=${paymentId}&plan=${plan}&success=true${
+          result.duplicate ? "&duplicate=true" : ""
+        }`
+      );
+    } catch (error) {
+      console.error("Error saving payment data:", error);
+      alert("Failed to process payment. Please try again.");
+    }
   };
 
   return (
@@ -59,11 +98,7 @@ export default function PricingPage() {
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-medium text-gray-900">
                 Payment for{" "}
-                {selectedPlan === "code"
-                  ? "Code Only"
-                  : selectedPlan === "live"
-                  ? "Live Website"
-                  : "Mock Test"}
+                {selectedPlan === "code" ? "Code Only" : "Live Website"}
               </h3>
               <button
                 onClick={closeModal}
@@ -116,11 +151,11 @@ export default function PricingPage() {
                   Option 1: Code Only
                 </h2>
                 <p className="mt-4 text-base text-gray-500">
-                  Perfect for developers or students who just want the files
+                  Complete React/Next.js code in a ZIP file with 3 free edits
                 </p>
                 <p className="mt-8 flex items-baseline">
                   <span className="text-4xl font-extrabold text-gray-900">
-                    ₹699
+                    ₹2,500
                   </span>
                   <span className="ml-1 text-xl font-semibold text-gray-500">
                     one-time
@@ -153,7 +188,7 @@ export default function PricingPage() {
                       />
                     </svg>
                     <span className="text-base text-gray-700">
-                      Full HTML, CSS, JS code
+                      Complete Next.js/React code in ZIP
                     </span>
                   </li>
                   <li className="flex space-x-3">
@@ -170,7 +205,7 @@ export default function PricingPage() {
                       />
                     </svg>
                     <span className="text-base text-gray-700">
-                      Self-host or deploy yourself
+                      Three free customization edits
                     </span>
                   </li>
                   <li className="flex space-x-3">
@@ -187,7 +222,7 @@ export default function PricingPage() {
                       />
                     </svg>
                     <span className="text-base text-gray-700">
-                      Basic customization guide
+                      Detailed documentation included
                     </span>
                   </li>
                 </ul>
@@ -207,11 +242,11 @@ export default function PricingPage() {
                   Option 2: Live Website
                 </h2>
                 <p className="mt-4 text-base text-gray-500">
-                  Full-service solution with live deployment and support
+                  Full-service Next.js solution with deployment and support
                 </p>
                 <p className="mt-8 flex items-baseline">
                   <span className="text-4xl font-extrabold text-gray-900">
-                    ₹799
+                    ₹6,000
                   </span>
                   <span className="ml-1 text-xl font-semibold text-gray-500">
                     one-time
@@ -261,7 +296,7 @@ export default function PricingPage() {
                       />
                     </svg>
                     <span className="text-base text-gray-700">
-                      We deploy it for you
+                      We deploy it for you on Vercel/Netlify
                     </span>
                   </li>
                   <li className="flex space-x-3">
@@ -278,51 +313,13 @@ export default function PricingPage() {
                       />
                     </svg>
                     <span className="text-base text-gray-700">
-                      Your site is LIVE in 3–4 days
+                      Unlimited edits for 7 days
                     </span>
                   </li>
                 </ul>
               </div>
             </motion.div>
           </div>
-
-          {/* Mock Payment Option (Development Only) */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3, duration: 0.5 }}
-            className="mt-12 max-w-md mx-auto border border-gray-300 rounded-lg p-6 bg-gray-50"
-          >
-            <div className="text-center mb-4">
-              <h3 className="text-lg font-medium text-gray-700 flex items-center justify-center">
-                <span className="mr-2 bg-gray-200 p-1 rounded-full text-sm">
-                  💻
-                </span>
-                Development Testing
-              </h3>
-              <p className="text-sm text-gray-500 mt-1">
-                Mock payment for testing (₹1)
-              </p>
-            </div>
-
-            <button
-              onClick={() => handleChoosePlan("mock")}
-              className="w-full bg-gray-600 border border-transparent rounded-md py-3 text-sm font-semibold text-white text-center hover:bg-gray-700 transition-colors shadow-md hover:shadow-lg"
-            >
-              Test Payment (₹1.00)
-            </button>
-
-            <button
-              onClick={() => handleManualPayment("mock")}
-              className="mt-4 w-full bg-green-600 border border-transparent rounded-md py-3 text-sm font-semibold text-white text-center hover:bg-green-700 transition-colors shadow-md hover:shadow-lg"
-            >
-              Test Access (Skip Payment)
-            </button>
-
-            <p className="text-xs text-gray-400 mt-3 text-center">
-              This option is for development testing only
-            </p>
-          </motion.div>
 
           {/* Feature comparison table */}
           {/* ...existing code... */}

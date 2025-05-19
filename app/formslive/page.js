@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import PaymentCheck from "../components/PaymentCheck";
 
 // Main Component with Payment Check
@@ -15,6 +16,7 @@ export default function LiveWebsiteFormPage() {
 
 // Live Website Form Component
 function LiveWebsiteForm() {
+  const router = useRouter();
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -49,6 +51,48 @@ function LiveWebsiteForm() {
     domainType: "",
     customDomain: "",
   });
+  const [paymentInfo, setPaymentInfo] = useState(null);
+  const [isVerifying, setIsVerifying] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submissionError, setSubmissionError] = useState(null);
+
+  // Fetch payment data on component mount
+  useEffect(() => {
+    const verifyPayment = async () => {
+      try {
+        // Get payment ID from URL or sessionStorage as fallback
+        const urlParams = new URLSearchParams(window.location.search);
+        const paymentId =
+          urlParams.get("paymentId") || sessionStorage.getItem("paymentId");
+
+        if (!paymentId && !formData.bypassPayment) {
+          return;
+        }
+
+        // Verify payment with the server
+        const response = await fetch(`/api/payments/verify?id=${paymentId}`);
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success) {
+            setPaymentInfo({
+              id: data.paymentDetails.id,
+              plan: data.paymentDetails.plan,
+              date: data.paymentDetails.date,
+              userName: data.paymentDetails.userName,
+              transactionId: data.paymentDetails.transactionId,
+            });
+          }
+        }
+      } catch (error) {
+        console.error("Error verifying payment:", error);
+      } finally {
+        setIsVerifying(false);
+      }
+    };
+
+    verifyPayment();
+  }, [formData.bypassPayment]);
 
   // Predefined options for select fields
   const skillOptions = [
@@ -108,7 +152,6 @@ function LiveWebsiteForm() {
     "2 months",
     "3+ months",
   ];
-
   const domainOptions = [
     "Personal Portfolio",
     "Professional Resume",
@@ -152,23 +195,17 @@ function LiveWebsiteForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Payment validation - check if payment exists or bypass is enabled
-    const paymentCompleted =
-      localStorage.getItem("paymentCompleted") === "true";
-    const paymentPlan = localStorage.getItem("paymentPlan");
-
-    if (
-      !paymentCompleted &&
-      !formData.bypassPayment &&
-      paymentPlan !== "live" &&
-      paymentPlan !== "mock"
-    ) {
+    // Payment validation
+    if (!paymentInfo && !formData.bypassPayment) {
       alert(
-        "Payment is required before submitting this form. Please complete payment on the pricing page."
+        "Payment verification failed. Please complete payment on the pricing page before submitting this form."
       );
       router.push("/pricing");
       return;
     }
+
+    // Show loading state
+    setIsSubmitting(true);
 
     try {
       // Create FormData object to handle file uploads
@@ -207,23 +244,15 @@ function LiveWebsiteForm() {
         formDataToSend.append("paymentId", "TESTING-BYPASS");
         formDataToSend.append("paymentDate", new Date().toISOString());
         formDataToSend.append("paymentName", "Test User");
-      } else {
-        // Regular payment flow
-        formDataToSend.append(
-          "paymentId",
-          localStorage.getItem("paymentId") || "UNPAID"
-        );
-        formDataToSend.append(
-          "paymentDate",
-          localStorage.getItem("paymentDate") || ""
-        );
-        formDataToSend.append(
-          "paymentName",
-          localStorage.getItem("paymentName") || "Unknown"
-        );
+      } else if (paymentInfo) {
+        // Use the verified payment info from MongoDB
+        formDataToSend.append("paymentId", paymentInfo.id);
+        formDataToSend.append("paymentDate", paymentInfo.date);
+        formDataToSend.append("paymentName", paymentInfo.userName);
+        formDataToSend.append("transactionId", paymentInfo.transactionId || "");
       }
 
-      // Generate submission ID (you can modify this format)
+      // Generate submission ID
       const submissionId = `LD-${Math.floor(1000 + Math.random() * 9000)}`;
       formDataToSend.append("id", submissionId);
 
@@ -231,60 +260,39 @@ function LiveWebsiteForm() {
       const submittedAt = new Date().toISOString().split("T")[0];
       formDataToSend.append("submittedAt", submittedAt);
 
-      // Send to API
+      // Send to API with better error handling
       const response = await fetch("/api/submissions", {
         method: "POST",
         body: formDataToSend,
       });
 
+      const result = await response.json();
+
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to submit form");
+        throw new Error(
+          result.error || "Failed to submit form. Please try again."
+        );
       }
 
-      // Show success message
-      alert(
-        "Form submitted successfully! We'll contact you about your live website soon."
-      );
-
-      // Reset form
-      setFormData({
-        fullName: "",
-        email: "",
-        title: "",
-        jobProfile: "",
-        skills: "",
-        experience: "",
-        education: "",
-        projects: "",
-        githubProfile: "",
-        resume: null,
-        designPreferences: "",
-        colorScheme: "",
-        fontFamily: "",
-        layoutStyle: "",
-        seoOptimization: false,
-        contactFormNeeded: false,
-        blogSection: false,
-        portfolioGallery: false,
-        responsivePreference: "all",
-        socialMediaLinks: "",
-        languagePreference: "",
-        targetAudience: "",
-        projectTimeline: "",
-        uploadedFiles: [],
-        additionalRequests: "",
-        githubUsername: "",
-        githubPassword: "",
-        vercelId: "",
-        vercelPassword: "",
-        bypassPayment: false,
-        domainType: "",
-        customDomain: "",
-      });
+      // Redirect to confirmation page
+      router.push(`/submission-success?id=${submissionId}&type=live`);
     } catch (error) {
       console.error("Error submitting form:", error);
-      alert("There was an error submitting your form: " + error.message);
+
+      // Provide a more user-friendly error message
+      let errorMessage =
+        "There was an error submitting your form. Please try again.";
+      if (error.message && error.message.includes("ENOENT")) {
+        errorMessage =
+          "There was a problem with file uploads. Our team has been notified.";
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
+      setSubmissionError(errorMessage);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -293,6 +301,53 @@ function LiveWebsiteForm() {
       <h1 className="text-3xl font-bold text-center mb-8 text-blue-700">
         Live Website Request Form
       </h1>
+
+      {submissionError && (
+        <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative">
+          <p className="font-medium">Submission Error</p>
+          <p className="text-sm">{submissionError}</p>
+        </div>
+      )}
+
+      {isVerifying && (
+        <div className="mb-6 bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded relative">
+          <div className="flex items-center">
+            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-700 mr-3"></div>
+            <span>Verifying payment status...</span>
+          </div>
+        </div>
+      )}
+
+      {!isVerifying && !paymentInfo && !formData.bypassPayment && (
+        <div className="mb-6 bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded relative">
+          <p className="font-medium">Payment verification required</p>
+          <p className="text-sm">
+            Please complete payment before submitting this form.
+          </p>
+          <button
+            onClick={() => router.push("/pricing")}
+            className="mt-2 bg-yellow-100 hover:bg-yellow-200 text-yellow-800 py-1 px-3 rounded text-sm"
+          >
+            Go to pricing page
+          </button>
+        </div>
+      )}
+
+      {!isVerifying && (paymentInfo || formData.bypassPayment) && (
+        <div className="mb-6 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded relative">
+          <p className="font-medium">Payment verified</p>
+          {paymentInfo && (
+            <p className="text-sm">
+              Payment ID: {paymentInfo.id.substring(0, 8)}...
+            </p>
+          )}
+          {formData.bypassPayment && (
+            <p className="text-sm">
+              Development testing mode (payment bypassed)
+            </p>
+          )}
+        </div>
+      )}
 
       <form
         onSubmit={handleSubmit}
@@ -597,8 +652,7 @@ function LiveWebsiteForm() {
             </label>
           </div>
           <p className="text-xs text-gray-500 mt-1">
-            This allows form submission without PayPal payment for testing
-            purposes.
+            This allows form submission without payment for testing purposes.
             <strong className="text-red-600"> Remove in production!</strong>
           </p>
         </div>
@@ -607,8 +661,13 @@ function LiveWebsiteForm() {
           <button
             type="submit"
             className="w-full px-8 py-4 bg-blue-600 text-white font-medium text-lg rounded-md shadow-md hover:bg-blue-700 transition duration-300 ease-in-out transform hover:scale-[1.02]"
+            disabled={
+              isVerifying ||
+              (!paymentInfo && !formData.bypassPayment) ||
+              isSubmitting
+            }
           >
-            Submit Live Website Request
+            {isSubmitting ? "Submitting..." : "Submit Live Website Request"}
           </button>
         </div>
       </form>

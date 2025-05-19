@@ -136,7 +136,7 @@ export default function About() {
                     Custom Portfolio Websites
                   </h3>
                   <p className="text-gray-600">
-                    Professional sites from ₹2,500 - your brand, your style
+                    Professional sites from ₹3000 - your brand, your style
                   </p>
                 </div>
               </div>

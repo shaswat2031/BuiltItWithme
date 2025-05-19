@@ -1,14 +1,15 @@
-import { NextResponse } from 'next/server';
+import { NextResponse } from "next/server";
 
-export function middleware(request) {
-  // Log API requests for debugging
-  if (request.nextUrl.pathname.startsWith('/api/')) {
-    console.log(`[${new Date().toISOString()}] ${request.method} ${request.nextUrl.pathname}`);
-  }
-  
-  return NextResponse.next();
+export async function middleware(request) {
+  // For API routes that handle file uploads, modify the response headers
+  const response = NextResponse.next();
+
+  // Increase the body parser size limit for API routes that handle file uploads
+  response.headers.set("x-middleware-rewrite", "1");
+
+  return response;
 }
 
 export const config = {
-  matcher: '/api/:path*',
-}
+  matcher: ["/api/submissions/:path*"],
+};

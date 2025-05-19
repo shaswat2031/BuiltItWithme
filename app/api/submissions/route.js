@@ -1,9 +1,8 @@
-import { NextResponse } from 'next/server';
-import dbConnect from '../../../lib/dbConnect';
-import Submission from '../../../models/Submission';
-import { writeFile } from 'fs/promises';
-import path from 'path';
-import fs from 'fs/promises';
+import { NextResponse } from "next/server";
+import dbConnect from "../../../lib/dbConnect";
+import Submission from "../../../models/Submission";
+import { processAndUploadFile } from "../../../utils/storageUtils";
+import { generatePdfBuffer } from "../../../utils/utilities";
 
 // Get all submissions
 export async function GET() {
@@ -12,7 +11,7 @@ export async function GET() {
     const submissions = await Submission.find({}).sort({ submittedAt: -1 });
     return NextResponse.json(submissions);
   } catch (error) {
-    console.error('Error fetching submissions:', error);
+    console.error("Error fetching submissions:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
@@ -22,42 +21,75 @@ export async function POST(request) {
   try {
     await dbConnect();
     console.log("API route: Received submission request");
-    
+
+    // Check if request size exceeds limits
+    const contentLength = request.headers.get("content-length");
+    if (contentLength && parseInt(contentLength) > 50 * 1024 * 1024) {
+      // 50MB limit
+      return NextResponse.json(
+        { error: "Request payload too large. File size limit is 50MB." },
+        { status: 413 }
+      );
+    }
+
     // Handle multipart form data
-    const formData = await request.formData();
-    console.log("API route: Parsed form data");
-    
+    let formData;
+    try {
+      formData = await request.formData();
+      console.log("API route: Parsed form data");
+    } catch (formDataError) {
+      console.error("Error parsing form data:", formDataError);
+      return NextResponse.json(
+        { error: "Failed to parse form data", details: formDataError.message },
+        { status: 400 }
+      );
+    }
+
     // Extract basic submission info
-    const id = formData.get('id');
-    const planType = formData.get('planType');
-    const fullName = formData.get('fullName');
-    const email = formData.get('email');
-    const submittedAt = formData.get('submittedAt');
-    const status = formData.get('status');
-    
+    const id = formData.get("id");
+    const planType = formData.get("planType");
+    const fullName = formData.get("fullName");
+    const email = formData.get("email");
+    const submittedAt = formData.get("submittedAt");
+    const status = formData.get("status");
+
     console.log(`API route: Processing submission ID ${id}`);
-    
+
     // Create details object from form data
     const details = {};
-    
+
     // Text fields to extract
     const textFields = [
-      'title', 'jobProfile', 'skills', 'githubProfile', 'designPreferences',
-      'colorScheme', 'fontFamily', 'layoutStyle', 'responsivePreference',
-      'socialMediaLinks', 'languagePreference', 'targetAudience', 'projectTimeline',
-      'additionalRequests', 'githubUsername', 'githubPassword', 'vercelId', 'vercelPassword'
+      "title",
+      "jobProfile",
+      "skills",
+      "githubProfile",
+      "designPreferences",
+      "colorScheme",
+      "fontFamily",
+      "layoutStyle",
+      "responsivePreference",
+      "socialMediaLinks",
+      "languagePreference",
+      "targetAudience",
+      "projectTimeline",
+      "additionalRequests",
+      "githubUsername",
+      "githubPassword",
+      "vercelId",
+      "vercelPassword",
     ];
-    
+
     // Extract text fields
-    textFields.forEach(field => {
+    textFields.forEach((field) => {
       const value = formData.get(field);
       if (value) {
         details[field] = value;
       }
     });
-    
+
     // Handle array fields if they exist (for code submissions)
-    ['projects', 'experience', 'education'].forEach(arrayField => {
+    ["projects", "experience", "education"].forEach((arrayField) => {
       const value = formData.get(arrayField);
       if (value) {
         try {
@@ -68,18 +100,21 @@ export async function POST(request) {
         }
       }
     });
-    
+
     // Boolean fields to extract
     const booleanFields = [
-      'seoOptimization', 'contactFormNeeded', 'blogSection', 'portfolioGallery'
+      "seoOptimization",
+      "contactFormNeeded",
+      "blogSection",
+      "portfolioGallery",
     ];
-    
+
     // Extract boolean fields
-    booleanFields.forEach(field => {
+    booleanFields.forEach((field) => {
       const value = formData.get(field);
-      details[field] = value === 'true' || value === true;
+      details[field] = value === "true" || value === true;
     });
-    
+
     // Create submission object
     const submission = {
       id,
@@ -88,62 +123,94 @@ export async function POST(request) {
       email,
       submittedAt,
       status,
-      details
+      details,
     };
-    
-    console.log("API route: Created submission object:", JSON.stringify(submission));
-    
-    // Ensure uploads directory exists
-    const uploadsDir = path.join(process.cwd(), 'public', 'uploads');
+
+    // Generate PDF from submission data
     try {
-      await fs.access(uploadsDir);
-    } catch {
-      console.log("API route: Creating uploads directory");
-      await fs.mkdir(uploadsDir, { recursive: true });
+      const pdfBuffer = await generatePdfBuffer(submission, true);
+      const fileName = `${id}-submission.pdf`;
+
+      // Upload PDF to cloud storage
+      const pdfUploadResult = await processAndUploadFile(
+        {
+          arrayBuffer: async () => pdfBuffer,
+          name: fileName,
+          type: "application/pdf",
+        },
+        id
+      );
+
+      submission.pdfUrl = pdfUploadResult.url;
+      submission.pdfDownloadUrl = pdfUploadResult.downloadUrl;
+      submission.storageProvider = pdfUploadResult.provider;
+
+      console.log(
+        `API route: Generated and uploaded PDF: ${submission.pdfUrl}`
+      );
+    } catch (pdfError) {
+      console.error("Error generating/uploading PDF:", pdfError);
+      // Continue with submission even if PDF generation fails
     }
-    
-    // Handle file uploads
-    const resume = formData.get('resume');
+
+    // Handle resume file upload
+    const resume = formData.get("resume");
     if (resume && resume.name) {
       console.log("API route: Processing resume file");
-      const resumeBuffer = await resume.arrayBuffer();
-      const resumeBytes = Buffer.from(resumeBuffer);
-      const fileName = `${id}-resume-${Date.now()}${path.extname(resume.name)}`;
-      const filePath = path.join(process.cwd(), 'public', 'uploads', fileName);
-      
-      await writeFile(filePath, resumeBytes);
-      submission.resumeUrl = `/uploads/${fileName}`;
-      console.log(`API route: Saved resume file: ${fileName}`);
+      try {
+        const resumeUploadResult = await processAndUploadFile(resume, id);
+        submission.resumeUrl = resumeUploadResult.url;
+        submission.resumeDownloadUrl = resumeUploadResult.downloadUrl;
+        submission.resumeStorageProvider = resumeUploadResult.provider;
+        console.log(`API route: Uploaded resume file: ${submission.resumeUrl}`);
+      } catch (resumeError) {
+        console.error("Error processing resume file:", resumeError);
+      }
     }
-    
+
     // Handle additional files
-    const uploadedFiles = formData.getAll('uploadedFiles');
+    const uploadedFiles = formData.getAll("uploadedFiles");
     if (uploadedFiles && uploadedFiles.length > 0) {
-      console.log(`API route: Processing ${uploadedFiles.length} additional files`);
+      console.log(
+        `API route: Processing ${uploadedFiles.length} additional files`
+      );
       submission.uploadedFilesUrl = [];
-      
+      submission.uploadedFilesDownloadUrl = [];
+      submission.uploadedFilesProvider = [];
+
       for (const file of uploadedFiles) {
         if (file.name) {
-          const fileBuffer = await file.arrayBuffer();
-          const fileBytes = Buffer.from(fileBuffer);
-          const fileName = `${id}-file-${Date.now()}${path.extname(file.name)}`;
-          const filePath = path.join(process.cwd(), 'public', 'uploads', fileName);
-          
-          await writeFile(filePath, fileBytes);
-          submission.uploadedFilesUrl.push(`/uploads/${fileName}`);
-          console.log(`API route: Saved additional file: ${fileName}`);
+          try {
+            const fileUploadResult = await processAndUploadFile(file, id);
+            submission.uploadedFilesUrl.push(fileUploadResult.url);
+            submission.uploadedFilesDownloadUrl.push(
+              fileUploadResult.downloadUrl
+            );
+            submission.uploadedFilesProvider.push(fileUploadResult.provider);
+            console.log(`API route: Uploaded additional file: ${file.name}`);
+          } catch (fileError) {
+            console.error("Error processing uploaded file:", fileError);
+          }
         }
       }
     }
-    
+
     // Save to database
     console.log("API route: Saving to database");
     const newSubmission = await Submission.create(submission);
-    console.log(`API route: Submission saved successfully with ID: ${newSubmission.id}`);
-    
+    console.log(
+      `API route: Submission saved successfully with ID: ${newSubmission.id}`
+    );
+
     return NextResponse.json(newSubmission, { status: 201 });
   } catch (error) {
-    console.error('Submission error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error("Submission error:", error);
+    return NextResponse.json(
+      {
+        error: error.message,
+        stack: process.env.NODE_ENV === "development" ? error.stack : undefined,
+      },
+      { status: 500 }
+    );
   }
 }

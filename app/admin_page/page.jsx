@@ -432,18 +432,17 @@ export default function AdminDashboard() {
                         rel="noopener noreferrer"
                         className="flex items-center px-3 py-1.5 bg-blue-50 text-blue-600 text-sm font-medium rounded-md hover:bg-blue-100 transition-colors"
                       >
-                        <FiDownload className="mr-1" /> User PDF
+                        <FiDownload className="mr-1" /> PDF
                       </a>
                     )}
 
-                    {selectedSubmission.adminPdfUrl && (
+                    {selectedSubmission.pdfDownloadUrl && (
                       <a
-                        href={selectedSubmission.adminPdfUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                        href={selectedSubmission.pdfDownloadUrl}
+                        download={`${selectedSubmission.id}-submission.pdf`}
                         className="flex items-center px-3 py-1.5 bg-indigo-50 text-indigo-600 text-sm font-medium rounded-md hover:bg-indigo-100 transition-colors"
                       >
-                        <FiDownload className="mr-1" /> Admin PDF
+                        <FiDownload className="mr-1" /> Download
                       </a>
                     )}
 

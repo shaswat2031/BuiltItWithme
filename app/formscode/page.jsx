@@ -13,6 +13,7 @@ import {
   FiGithub,
 } from "react-icons/fi";
 import PaymentCheck from "../components/PaymentCheck";
+import { useRouter } from "next/navigation"; // Correct import for App Router
 
 // Main Form Component
 export default function CodeOnlyForm() {
@@ -27,6 +28,7 @@ export default function CodeOnlyForm() {
 
 // Form Content Component
 function CodeOnlyFormContent() {
+  const router = useRouter(); // This is now from next/navigation
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -55,6 +57,9 @@ function CodeOnlyFormContent() {
     uploadedFiles: [],
     additionalRequests: "",
   });
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submissionError, setSubmissionError] = useState(null);
 
   const emptyEducation = {
     institution: "",
@@ -121,9 +126,12 @@ function CodeOnlyFormContent() {
     }
   };
 
-  // Add payment ID to form submission
+  // Handle submission with proper error handling for App Router
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Show loading state
+    setIsSubmitting(true);
 
     try {
       // Create FormData object to handle file uploads
@@ -190,22 +198,39 @@ function CodeOnlyFormContent() {
         body: formDataToSend,
       });
 
+      const result = await response.json();
+
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to submit form");
+        throw new Error(
+          result.error || "Failed to submit form. Please try again."
+        );
       }
 
-      alert("Form submitted successfully! We'll send your code package soon.");
-
-      // Reset form or redirect
-      // You could redirect to a success page or reset the form
+      // Redirect to success page - using App Router navigation
+      router.push(`/submission-success?id=${submissionId}&type=code`);
     } catch (error) {
       console.error("Error submitting form:", error);
-      alert("There was an error submitting your form: " + error.message);
+
+      // Provide a more user-friendly error message
+      let errorMessage =
+        "There was an error submitting your form. Please try again.";
+      if (error.message && error.message.includes("ENOENT")) {
+        errorMessage =
+          "There was a problem with file uploads. Our team has been notified.";
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
+      setSubmissionError(errorMessage);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
+  // Initialize form arrays
   useEffect(() => {
+    // This effect only runs on the client side
     if (formData.education.length === 0) addEducation();
     if (formData.projects.length === 0) addProject();
     if (formData.experience.length === 0) addExperience();
@@ -219,6 +244,12 @@ function CodeOnlyFormContent() {
       <h2 className="text-3xl font-bold mb-6 text-gray-800 border-b pb-3 border-gray-200">
         Premium Code Request
       </h2>
+
+      {submissionError && (
+        <div className="bg-red-100 text-red-700 p-4 rounded-lg mb-6">
+          <p>{submissionError}</p>
+        </div>
+      )}
 
       <div className="bg-white p-6 rounded-lg shadow-md space-y-5">
         <h3 className="text-xl font-semibold text-gray-700 mb-4 flex items-center">
@@ -506,8 +537,15 @@ function CodeOnlyFormContent() {
         <button
           type="submit"
           className="px-8 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold text-lg rounded-lg shadow-lg hover:from-indigo-700 hover:to-purple-700 transition-all transform hover:scale-105 flex items-center"
+          disabled={isSubmitting}
         >
-          <FiCheck className="mr-2" /> Submit Code Request
+          {isSubmitting ? (
+            <span>Submitting...</span>
+          ) : (
+            <>
+              <FiCheck className="mr-2" /> Submit Code Request
+            </>
+          )}
         </button>
       </div>
     </form>

@@ -9,6 +9,7 @@ export default function PaymentContent() {
   const router = useRouter();
   const [status, setStatus] = useState("processing");
   const [paymentDetails, setPaymentDetails] = useState({});
+  const [isVerified, setIsVerified] = useState(false);
 
   useEffect(() => {
     const success = searchParams.get("success") === "true";
@@ -16,32 +17,66 @@ export default function PaymentContent() {
     const plan = searchParams.get("plan");
 
     if (success && paymentId) {
-      // Get payment details from localStorage
-      const paymentName = localStorage.getItem("paymentName") || "Customer";
+      // Verify payment with the server
+      const verifyPayment = async () => {
+        try {
+          const response = await fetch(
+            `/api/payments/verify?id=${paymentId}&plan=${plan}`
+          );
 
-      setPaymentDetails({
-        id: paymentId,
-        plan: plan,
-        date: new Date(
-          localStorage.getItem("paymentDate") || new Date()
-        ).toLocaleString(),
-        name: paymentName,
-      });
+          if (!response.ok) {
+            throw new Error("Payment verification failed");
+          }
 
-      setStatus("success");
+          const data = await response.json();
 
-      // Auto-redirect after 5 seconds
-      const timer = setTimeout(() => {
-        if (plan === "code") {
-          router.push("/formscode");
-        } else if (plan === "live") {
-          router.push("/formslive");
-        } else if (plan === "mock") {
-          // Don't auto-redirect for mock payments
+          if (data.success) {
+            setIsVerified(true);
+
+            // Get additional details from localStorage
+            const transactionId =
+              localStorage.getItem("transactionId") || "N/A";
+
+            setPaymentDetails({
+              id: paymentId,
+              plan: plan,
+              date: new Date(
+                data.paymentDetails.date ||
+                  localStorage.getItem("paymentDate") ||
+                  new Date()
+              ).toLocaleString(),
+              name:
+                data.paymentDetails.userName ||
+                localStorage.getItem("paymentName") ||
+                "Customer",
+              transactionId: transactionId,
+              verifiedWithServer: true,
+            });
+
+            setStatus("success");
+
+            // Auto-redirect after 5 seconds
+            const timer = setTimeout(() => {
+              if (plan === "code") {
+                router.push("/formscode");
+              } else if (plan === "live") {
+                router.push("/formslive");
+              } else if (plan === "mock") {
+                // Don't auto-redirect for mock payments
+              }
+            }, 5000);
+
+            return () => clearTimeout(timer);
+          } else {
+            setStatus("failed");
+          }
+        } catch (error) {
+          console.error("Error verifying payment:", error);
+          setStatus("failed");
         }
-      }, 5000);
+      };
 
-      return () => clearTimeout(timer);
+      verifyPayment();
     } else {
       setStatus("failed");
     }
@@ -101,6 +136,11 @@ export default function PaymentContent() {
               </div>
               <h3 className="text-lg font-medium text-gray-900 text-center mb-4">
                 Payment Successful
+                {isVerified && (
+                  <span className="ml-2 text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
+                    Verified
+                  </span>
+                )}
               </h3>
 
               {paymentDetails && (
@@ -131,6 +171,15 @@ export default function PaymentContent() {
                     <div className="sm:grid sm:grid-cols-3 sm:gap-4">
                       <dt className="text-sm font-medium text-gray-500">
                         Transaction ID
+                      </dt>
+                      <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                        {paymentDetails.transactionId}
+                      </dd>
+                    </div>
+
+                    <div className="sm:grid sm:grid-cols-3 sm:gap-4">
+                      <dt className="text-sm font-medium text-gray-500">
+                        Payment ID
                       </dt>
                       <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
                         {paymentDetails.id}
@@ -202,10 +251,11 @@ export default function PaymentContent() {
                 </div>
               </div>
               <h3 className="text-lg font-medium text-gray-900 text-center mb-4">
-                Payment Failed
+                Payment Verification Failed
               </h3>
               <p className="text-sm text-gray-600 mb-6 text-center">
-                There was an issue processing your payment. Please try again.
+                There was an issue verifying your payment. Please try again or
+                contact support.
               </p>
               <div className="mt-4">
                 <Link

@@ -40,7 +40,7 @@ export default function Home() {
               Beautiful, responsive websites custom-built for your brand
               starting at just
               <span className="font-bold text-white ml-2 text-2xl md:text-3xl">
-                ₹2500
+                ₹3000
               </span>
               .<br />
               <span className="relative inline-block font-bold mx-2 px-2">
@@ -180,7 +180,7 @@ export default function Home() {
               {/* Basic Package */}
               <div className="mb-8 pb-2 border-b border-gray-100">
                 <h3 className="text-xl font-bold text-blue-600 mb-4">
-                  Basic Package (₹2,500)
+                  Basic Package (₹3000)
                 </h3>
                 <ul className="space-y-4">
                   {[
@@ -266,17 +266,17 @@ export default function Home() {
                   {[
                     {
                       icon: "💻",
-                      text: "Full source code access (₹699)",
+                      text: "Full source code access (₹799)",
                       highlight: "Developer option",
                     },
                     {
                       icon: "🛠️",
-                      text: "Complete setup with domain & email configuration (₹799)",
+                      text: "Complete setup with domain & email configuration (₹800)",
                       highlight: "Hassle-free",
                     },
                     {
                       icon: "🔄",
-                      text: "Free revisions within first 7 days of delivery",
+                      text: "Free revisions within first 5 days of delivery",
                       highlight: "Satisfaction guaranteed",
                     },
                   ].map((item, idx) => (
@@ -301,88 +301,8 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="py-16 px-4 bg-gradient-to-b from-white to-blue-50">
-        <div className="container mx-auto">
-          <div className="text-center mb-12">
-            <span className="bg-blue-100 text-blue-700 px-4 py-1 rounded-full text-sm font-medium mb-2 inline-block">
-              Simple Process
-            </span>
-            <h2 className="text-4xl font-bold mt-2">How It Works</h2>
-            <p className="text-gray-600 mt-4 max-w-2xl mx-auto">
-              Getting your professional website is just 3 simple steps away.
-              We&apos;ve streamlined the process to make it quick and
-              hassle-free.
-            </p>
-          </div>
-
-          <div className="flex flex-col md:flex-row justify-center items-stretch gap-6 max-w-5xl mx-auto">
-            {[
-              {
-                step: "01",
-                icon: "📝",
-                title: "Share Your Vision",
-                desc: "Fill our simple form with your requirements, preferences, and any examples you like. The more details you provide, the better we can match your vision.",
-                color: "blue",
-              },
-              {
-                step: "02",
-                icon: "🎨",
-                title: "We Create Your Site",
-                desc: "Our team of designers and developers will craft your custom website with attention to your brand, target audience, and specific needs.",
-                color: "purple",
-              },
-              {
-                step: "03",
-                icon: "🚀",
-                title: "Launch in 3-4 Days",
-                desc: "Your complete website is delivered and deployed quickly. We'll handle the technical setup so you can focus on your business.",
-                color: "green",
-              },
-            ].map((step, idx) => (
-              <div
-                key={idx}
-                className="relative bg-white rounded-xl shadow-md p-8 md:w-1/3 border border-gray-100 hover:shadow-lg transition-all duration-300"
-              >
-                <div
-                  className={`absolute -top-4 -right-4 w-12 h-12 rounded-full bg-${step.color}-600 flex items-center justify-center text-white font-bold`}
-                >
-                  {step.step}
-                </div>
-
-                <div className="text-4xl mb-6">{step.icon}</div>
-                <h3
-                  className={`text-2xl font-bold mb-4 text-${step.color}-600`}
-                >
-                  {step.title}
-                </h3>
-                <p className="text-gray-600 mb-4">{step.desc}</p>
-
-                {idx < 2 && (
-                  <div className="hidden md:block absolute top-1/2 -right-4 transform translate-x-0 z-10 text-3xl text-gray-300">
-                    →
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-
-          <div className="text-center mt-12">
-            <Link href="/pricing">
-              <MotionButton
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="bg-blue-600 text-white hover:bg-blue-700 px-8 py-4 rounded-xl font-bold transition shadow-lg hover:shadow-xl"
-              >
-                Start Your Project Now
-              </MotionButton>
-            </Link>
-            <p className="text-gray-500 mt-4 text-sm">
-              No commitment - Get a free consultation
-            </p>
-          </div>
-        </div>
-      </section>
       <Footer />
+      <Analytics />
     </main>
   );
 }
